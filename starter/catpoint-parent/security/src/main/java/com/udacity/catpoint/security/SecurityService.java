@@ -109,17 +109,18 @@ public class SecurityService {
      * Internal method for updating the alarm status when a sensor has been deactivated
      */
     private void handleSensorDeactivated() {
-//        switch(securityRepository.getAlarmStatus()) {
-//            case PENDING_ALARM -> setAlarmStatus(AlarmStatus.NO_ALARM);
+        switch(securityRepository.getAlarmStatus()) {
+            case PENDING_ALARM -> setAlarmStatus(AlarmStatus.NO_ALARM);
+            //research on knowledge Q&A, should remove this line
 //            case ALARM -> setAlarmStatus(AlarmStatus.PENDING_ALARM);
-//        }
-        boolean allSensorsInactive = securityRepository.getSensors().stream().allMatch(sensor -> !sensor.getActive());
-
-        if (allSensorsInactive && securityRepository.getAlarmStatus() == AlarmStatus.PENDING_ALARM) {
-            setAlarmStatus(AlarmStatus.NO_ALARM);  // Reset alarm if all sensors are inactive
-        } else if (securityRepository.getAlarmStatus() == AlarmStatus.ALARM) {
-            setAlarmStatus(AlarmStatus.PENDING_ALARM);  // Downgrade from ALARM to PENDING_ALARM
         }
+//        boolean allSensorsInactive = securityRepository.getSensors().stream().allMatch(sensor -> !sensor.getActive());
+//
+//        if (allSensorsInactive && securityRepository.getAlarmStatus() == AlarmStatus.PENDING_ALARM) {
+//            setAlarmStatus(AlarmStatus.NO_ALARM);  // Reset alarm if all sensors are inactive
+//        } else if (securityRepository.getAlarmStatus() == AlarmStatus.ALARM) {
+//            setAlarmStatus(AlarmStatus.PENDING_ALARM);  // Downgrade from ALARM to PENDING_ALARM
+//        }
     }
 
     /**
@@ -135,12 +136,13 @@ public class SecurityService {
         } else if (sensor.getActive() && active && securityRepository.getAlarmStatus() == AlarmStatus.PENDING_ALARM) {
             // Reactivating an already active sensor in pending state should escalate the alarm
             setAlarmStatus(AlarmStatus.ALARM);
-        } else if (!active){
-            boolean allSensorsInactive = securityRepository.getSensors().stream().allMatch(sensor1 -> !sensor1.getActive());
-            if (getAlarmStatus() == AlarmStatus.PENDING_ALARM && allSensorsInactive) {
-                setAlarmStatus(AlarmStatus.NO_ALARM);
-            }
         }
+//        else if (!active){
+//            boolean allSensorsInactive = securityRepository.getSensors().stream().allMatch(sensor1 -> !sensor1.getActive());
+//            if (getAlarmStatus() == AlarmStatus.PENDING_ALARM && allSensorsInactive) {
+//                setAlarmStatus(AlarmStatus.NO_ALARM);
+//            }
+//        }
 
         sensor.setActive(active);
         securityRepository.updateSensor(sensor);

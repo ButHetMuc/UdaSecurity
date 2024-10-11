@@ -2,14 +2,22 @@ package com.udacity.catpoint.security;
 
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
-
+import com.udacity.catpoint.security.data.ArmingStatus;
 import com.udacity.catpoint.images.FakeImageService;
 import com.udacity.catpoint.security.data.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.*;
+
+import java.util.HashSet;
 import java.util.Set;
 import java.awt.image.BufferedImage;
+import java.util.stream.Stream;
 
 class SecurityServiceTest {
 
@@ -30,6 +38,7 @@ class SecurityServiceTest {
 
     @Mock
     private Sensor sensor;
+
 
     @BeforeEach
     void setUp() {
@@ -70,11 +79,12 @@ class SecurityServiceTest {
     @Test
     void whenPendingAlarmAndAllSensorsInactive_setNoAlarmStatus() {
         when(securityRepository.getAlarmStatus()).thenReturn(AlarmStatus.PENDING_ALARM);
-        when(sensor1.getActive()).thenReturn(false);
+        when(sensor1.getActive()).thenReturn(true);
+        when(sensor2.getActive()).thenReturn(false);
 
         // Act
         securityService.changeSensorActivationStatus(sensor1, false);
-
+        securityService.changeSensorActivationStatus(sensor2, true);
         // Assert
         verify(securityRepository).setAlarmStatus(AlarmStatus.NO_ALARM);  // Ensure NO_ALARM is set
     }
@@ -184,14 +194,26 @@ class SecurityServiceTest {
         verify(securityRepository).setAlarmStatus(AlarmStatus.ALARM);
     }
 
-    @Test
-    void testSensorStateChangeWhileAlarmIsActive_noEffectOnAlarmStatus() {
+
+    @ParameterizedTest
+    @MethodSource("provideSensorStatesAndTypes")
+    void SensorStateChangeWhileAlarmIsActive_noEffectOnAlarmStatus(SensorType sensorType, boolean isActive) {
 
         when(securityRepository.getAlarmStatus()).thenReturn(AlarmStatus.ALARM);
-        sensor.setSensorType(SensorType.DOOR);
-        sensor.setActive(false);
+        sensor.setSensorType(sensorType);
+        sensor.setActive(isActive);
         securityService.changeSensorActivationStatus(sensor, false);
         verify(securityRepository, never()).setAlarmStatus(any());
+    }
+    private static Stream<Arguments> provideSensorStatesAndTypes() {
+        return Stream.of(
+                Arguments.of(SensorType.DOOR, false),
+                Arguments.of(SensorType.WINDOW, false),
+                Arguments.of(SensorType.MOTION, false),
+                Arguments.of(SensorType.DOOR, true),
+                Arguments.of(SensorType.WINDOW, true),
+                Arguments.of(SensorType.MOTION, true)
+        );
     }
 
     @Test
@@ -210,3 +232,5 @@ class SecurityServiceTest {
         verify(securityRepository, times(1)).setAlarmStatus(AlarmStatus.ALARM);
     }
 }
+
+
