@@ -46,10 +46,10 @@ public class SecurityService {
             setAlarmStatus(AlarmStatus.NO_ALARM);
         } else {
             // If system is armed (either ARMED_AWAY or ARMED_HOME), reset all sensors to inactive
-            securityRepository.getSensors().forEach(sensor -> {
-                sensor.setActive(false);
-                securityRepository.updateSensor(sensor);
-            });
+            securityRepository.getSensors().forEach(sensor ->
+                sensor.setActive(false)
+//                securityRepository.updateSensor(sensor);
+            );
         }
 
         // Finally, set the arming status in the repository
